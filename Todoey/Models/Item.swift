@@ -8,11 +8,11 @@
 
 import Foundation
 
-class Item {
+class Item: NSObject, Codable {
 
     var title : String = ""
     var done : Bool = false
     
     
 }
- 
+
