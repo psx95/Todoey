@@ -14,7 +14,7 @@ class TodoListViewController: UITableViewController {
     // Variables declared at the top should be initialised with a variable or they must be declared as optional.
     let realm = try! Realm()
     
-    var itemResults : Results<Item>!
+    var todoItems : Results<Item>!
     
     var selectedCategory : Category? {
         didSet { // This block of code will trigger only when the Optional variable has been set.
@@ -32,20 +32,18 @@ class TodoListViewController: UITableViewController {
         let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         print(dataFilePath!)
         
-        //loadItems()
-        
     }
     
     // MARK - TableView Datasource Methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemResults?.count ?? 1
+        return todoItems?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
        
-        if let item = itemResults?[indexPath.row] {
+        if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
             
             cell.accessoryType = item.done ? .checkmark : .none
@@ -60,6 +58,15 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        if let item = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                    item.done = !item.done
+                }
+            } catch {
+                print("Error updating items \(error)")
+            }
+        }
 //        itemResults[indexPath.row].done = !itemResults[indexPath.row].done
 //        //context.delete(itemArray[indexPath.row])
 //        //itemArray.remove(at: indexPath.row)
@@ -67,8 +74,8 @@ class TodoListViewController: UITableViewController {
 //            saveItems(item: nonNullResults[indexPath.row])
 //        }
 //
-//        tableView.deselectRow(at: indexPath, animated: true)
-//        tableView.reloadData()
+        tableView.deselectRow(at: indexPath, animated: true)
+        tableView.reloadData()
     }
     
     // MARK - Add New Items
@@ -111,7 +118,7 @@ class TodoListViewController: UITableViewController {
     
     
     func loadItems () {
-        itemResults = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
+        todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
 
         tableView.reloadData()
 
@@ -120,32 +127,28 @@ class TodoListViewController: UITableViewController {
 }
 
 // MARK: - Search Bar Methods
-//extension TodoListViewController: UISearchBarDelegate {
-//
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        let request: NSFetchRequest<Item> = Item.fetchRequest()
-//
-//        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
-//
-//        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-//
-//        loadItems(with: request, predicate: predicate)
-//
-//    }
-//
-//    // Reverting to original list
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        //print ("Called ")
-//        if searchBar.text?.count == 0 {
-//           // print ("Called ZERO")
-//            loadItems()
-//
-//            DispatchQueue.main.async {
-//                searchBar.resignFirstResponder()
-//            }
-//        }
-//    }
-//}
+extension TodoListViewController: UISearchBarDelegate {
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
+        print("Searc button clicked \(searchBar.text!)")
+        todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "title", ascending: true)
+        tableView.reloadData()
+    }
+
+    // Reverting to original list
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        //print ("Called ")
+        if searchBar.text?.count == 0 {
+           // print ("Called ZERO")
+            loadItems()
+
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
+}
 
 
 
