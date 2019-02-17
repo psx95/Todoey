@@ -17,20 +17,6 @@ class CategoryViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let categoryShopping = Category(context: context)
-        categoryShopping.name = "Shopping"
-        categoryShopping.count = 0
-        
-        
-        categoryArray.append(categoryShopping)
-        
-        let categoryChecklist = Category(context: context)
-        categoryChecklist.name = "Checklist"
-        categoryShopping.count = 0
-        
-        categoryArray.append(categoryChecklist)
-        
-        save()
         load()
     }
 
@@ -54,8 +40,29 @@ class CategoryViewController: UITableViewController {
     }
 
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
-        
         print ("Add BUtton Pressed")
+        
+        var categoryText = UITextField()
+        
+        let alert = UIAlertController(title: "Add New Category", message: "Enter the category name", preferredStyle: .alert)
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Ex. Shopping List"
+            categoryText = alertTextField
+        }
+        
+        let alertAction = UIAlertAction(title: "Add", style: .default) { (action) in
+            let newCategory = Category(context: self.context)
+            newCategory.name = categoryText.text
+            self.categoryArray.append(newCategory)
+            self.save()
+            self.load()
+        }
+        
+        alert.addAction(alertAction)
+        
+        present(alert, animated: true, completion: nil)
+        
     }
     
     func save () {
