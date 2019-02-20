@@ -95,6 +95,7 @@ class TodoListViewController: UITableViewController {
             if self.selectedCategory != nil {
                 let newItem = Item()
                 newItem.title = textField.text!
+                newItem.dateCreated = Date()
                 self.saveItems(item: newItem)
                 self.tableView.reloadData()
             }            
@@ -132,8 +133,15 @@ extension TodoListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         print("Searc button clicked \(searchBar.text!)")
-        todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "title", ascending: true)
+        todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: false)
+        printItemsWithDate(items: todoItems)
         tableView.reloadData()
+    }
+    
+    func printItemsWithDate(items: Results<Item>) {
+        for item in items {
+            print("Item - \(item.title) created on \(item.dateCreated)")
+        }
     }
 
     // Reverting to original list

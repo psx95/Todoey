@@ -19,11 +19,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-        do {
-            let realm = try Realm()            
-        } catch {
-            print("Unable to initialise Realm \(error)")
-        }
+        let config = Realm.Configuration(
+            // Set the new schema version. This must be greater than the previously used
+            // version (if you've never set a schema version before, the version is 0).
+            schemaVersion: 2,
+            
+            // Set the block which will be called automatically when opening a Realm with
+            // a schema version lower than the one set above
+            migrationBlock: { migration, oldSchemaVersion in
+                // We haven’t migrated anything yet, so oldSchemaVersion == 0
+                if (oldSchemaVersion < 2) {
+                    print("Migration in progress")
+                    migration.enumerateObjects(ofType: Item.className(), { (oldObject, newObject) in
+                        var dateComponents = DateComponents()
+                        dateComponents.year = 2019
+                        dateComponents.month = 1
+                        dateComponents.day = 1
+                        newObject!["dateCreated"] = NSCalendar.current.date(from: dateComponents)!
+                    })
+                }
+                
+        })
+        
+        Realm.Configuration.defaultConfiguration = config
+        
+        
+        lazy var _: Realm = {
+            return try! Realm()
+        }()
+//        do {
+//            let _ = try! Realm()
+//        } catch {
+//            print("Unable to initialise Realm \(error)")
+//        }
         
         return true
     }

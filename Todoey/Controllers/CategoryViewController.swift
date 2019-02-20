@@ -13,7 +13,9 @@ class CategoryViewController: UITableViewController {
 
     var categoryArray: Results<Category>!
     
-    let realm = try! Realm()
+    lazy var realm:Realm = {
+        return try! Realm()
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
