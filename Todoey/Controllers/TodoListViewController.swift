@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
 
     // Variables declared at the top should be initialised with a variable or they must be declared as optional.
     let realm = try! Realm()
@@ -32,6 +32,7 @@ class TodoListViewController: UITableViewController {
         let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         print(dataFilePath!)
         
+        tableView.rowHeight = 65.0
     }
     
     // MARK - TableView Datasource Methods
@@ -41,7 +42,8 @@ class TodoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
        
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
@@ -67,13 +69,7 @@ class TodoListViewController: UITableViewController {
                 print("Error updating items \(error)")
             }
         }
-//        itemResults[indexPath.row].done = !itemResults[indexPath.row].done
-//        //context.delete(itemArray[indexPath.row])
-//        //itemArray.remove(at: indexPath.row)
-//        if let nonNullResults = itemResults {
-//            saveItems(item: nonNullResults[indexPath.row])
-//        }
-//
+
         tableView.deselectRow(at: indexPath, animated: true)
         tableView.reloadData()
     }
@@ -106,6 +102,8 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
+    //MARK : DATA Model related functions
+    
     func saveItems (item: Item) {
         do {
             try realm.write {
@@ -122,7 +120,22 @@ class TodoListViewController: UITableViewController {
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
 
         tableView.reloadData()
-
+    }
+    
+    func deleteItem(item: Item) {
+        do {
+            try realm.write {
+                realm.delete(item)
+            }
+        } catch {
+            print ("Error deleting item \(error)")
+        }
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let itemToDelete = selectedCategory?.items[indexPath.row] {
+            deleteItem(item: itemToDelete)
+        }
     }
     
 }
