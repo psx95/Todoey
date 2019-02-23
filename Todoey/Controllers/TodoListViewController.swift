@@ -30,9 +30,7 @@ class TodoListViewController: SwipeTableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-        print(dataFilePath!)
-        
-        tableView.rowHeight = 65.0
+        print(dataFilePath!)            
     }
     
     // MARK - TableView Datasource Methods
@@ -133,7 +131,7 @@ class TodoListViewController: SwipeTableViewController {
     }
     
     override func updateModel(at indexPath: IndexPath) {
-        if let itemToDelete = selectedCategory?.items[indexPath.row] {
+        if let itemToDelete = todoItems?[indexPath.row] {            
             deleteItem(item: itemToDelete)
         }
     }
@@ -147,16 +145,9 @@ extension TodoListViewController: UISearchBarDelegate {
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         print("Searc button clicked \(searchBar.text!)")
         todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: false)
-        printItemsWithDate(items: todoItems)
         tableView.reloadData()
     }
     
-    func printItemsWithDate(items: Results<Item>) {
-        for item in items {
-            print("Item - \(item.title) created on \(item.dateCreated)")
-        }
-    }
-
     // Reverting to original list
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         //print ("Called ")
