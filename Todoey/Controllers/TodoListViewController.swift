@@ -21,11 +21,7 @@ class TodoListViewController: SwipeTableViewController {
     var categoryColor: String = ""
     
     var selectedCategory : Category? {
-        didSet { // This block of code will trigger only when the Optional variable has been set.
-            // This makes sure that when we do call load items, out category variable is not null.
-//            let request: NSFetchRequest<Item> = Item.fetchRequest()
-//            let predicate = NSPredicate(format: "parentCategory.name MATCHES %@", (selectedCategory?.name)!)
-//            request.predicate = predicate
+        didSet { // This block of code will trigger only when the Optional variable has been
             categoryColor = (selectedCategory?.color)!
            loadItems()
         }
@@ -35,19 +31,13 @@ class TodoListViewController: SwipeTableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         tableView.separatorStyle = .none
-//        navigationController?.navigationBar.barTintColor = UIColor(hexString: categoryColor)
-//        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: ContrastColorOf((navigationController?.navigationBar.barTintColor)!, returnFlat: true)]
         let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         print(dataFilePath!)            
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        if let navbarColor = UIColor(hexString: categoryColor) {
-            navigationController?.navigationBar.barTintColor = navbarColor
-            navigationController?.navigationBar.tintColor = ContrastColorOf(navbarColor, returnFlat: true)
-            searchBar.barTintColor = navbarColor
-            navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: ContrastColorOf(navbarColor, returnFlat: true)]
-        }
+        guard let colorHex = selectedCategory?.color else { fatalError() }
+        updateNavBar(withHexColor: colorHex)
         title = selectedCategory!.name
     }
     
@@ -157,12 +147,21 @@ class TodoListViewController: SwipeTableViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        guard let originalColor = UIColor(hexString: "1D9BF6") else { fatalError() }
-        navigationController?.navigationBar.barTintColor = originalColor
-        navigationController?.navigationBar.tintColor = FlatWhite()
-        navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : FlatWhite()]
+        updateNavBar(withHexColor: "1D9BF6")
     }
     
+    func updateNavBar(withHexColor hexColor: String) {
+        guard let navBar = navigationController?.navigationBar else { fatalError("NavigationController does not exist") }
+        
+        guard let navBarColor = UIColor(hexString: hexColor) else {
+            fatalError()
+        }
+        
+        navBar.barTintColor = navBarColor
+        navBar.tintColor = ContrastColorOf(navBarColor, returnFlat: true)
+        navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf(navBarColor, returnFlat: true)]
+        searchBar.barTintColor = navBarColor
+    }
 }
 
 // MARK: - Search Bar Methods
