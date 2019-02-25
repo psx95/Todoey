@@ -13,6 +13,8 @@ import ChameleonFramework
 class TodoListViewController: SwipeTableViewController {
 
     // Variables declared at the top should be initialised with a variable or they must be declared as optional.
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     let realm = try! Realm()
     
     var todoItems : Results<Item>!
@@ -37,6 +39,16 @@ class TodoListViewController: SwipeTableViewController {
 //        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: ContrastColorOf((navigationController?.navigationBar.barTintColor)!, returnFlat: true)]
         let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         print(dataFilePath!)            
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if let navbarColor = UIColor(hexString: categoryColor) {
+            navigationController?.navigationBar.barTintColor = navbarColor
+            navigationController?.navigationBar.tintColor = ContrastColorOf(navbarColor, returnFlat: true)
+            searchBar.barTintColor = navbarColor
+            navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: ContrastColorOf(navbarColor, returnFlat: true)]
+        }
+        title = selectedCategory!.name
     }
     
     // MARK - TableView Datasource Methods
@@ -142,6 +154,13 @@ class TodoListViewController: SwipeTableViewController {
         if let itemToDelete = todoItems?[indexPath.row] {            
             deleteItem(item: itemToDelete)
         }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        guard let originalColor = UIColor(hexString: "1D9BF6") else { fatalError() }
+        navigationController?.navigationBar.barTintColor = originalColor
+        navigationController?.navigationBar.tintColor = FlatWhite()
+        navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : FlatWhite()]
     }
     
 }
