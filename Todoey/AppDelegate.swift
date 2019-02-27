@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 import RealmSwift
+import ChameleonFramework
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -24,7 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let config = Realm.Configuration(
             // Set the new schema version. This must be greater than the previously used
             // version (if you've never set a schema version before, the version is 0).
-            schemaVersion: 2,
+            schemaVersion: 3,
             
             // Set the block which will be called automatically when opening a Realm with
             // a schema version lower than the one set above
@@ -38,6 +39,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         dateComponents.month = 1
                         dateComponents.day = 1
                         newObject!["dateCreated"] = NSCalendar.current.date(from: dateComponents)!
+                    })
+                }
+                
+                if (oldSchemaVersion < 3) {
+                    print("Migration in Progress")
+                    migration.enumerateObjects(ofType: Category.className(), { (oldObject, newObject) in
+                        newObject!["color"] = UIColor.randomFlat.hexValue()
                     })
                 }
                 
